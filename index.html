@@ -27,6 +27,12 @@
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
+    .filter-panel { margin-bottom: 1.5rem; }
+    .filter-grid { display: grid; grid-template-columns: repeat(4, minmax(8rem, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .feature-filters { display: flex; flex-wrap: wrap; gap: 0.75rem 1rem; margin-top: 1rem; }
+    .feature-filters label { display: flex; align-items: center; gap: 0.4rem; font-weight: 400; }
+    .feature-filters input { min-height: auto; }
+    .filter-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
     label { display: grid; gap: 0.4rem; font-weight: 700; }
     select, input, button {
       box-sizing: border-box;
@@ -67,6 +73,7 @@
     footer { margin-top: 2rem; color: #65717c; font-size: 0.875rem; }
     @media (max-width: 760px) {
       .controls, .explorer { grid-template-columns: 1fr; }
+      .filter-grid { grid-template-columns: 1fr 1fr; }
       .detail-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
@@ -95,6 +102,45 @@
           <input id="search-input" type="search" placeholder="Address, listing ID, ZIP, or price">
         </label>
       </div>
+      <section class="card filter-panel" aria-labelledby="filters-heading">
+        <h2 id="filters-heading">Filter sales</h2>
+        <div class="filter-grid">
+          <label>
+            Minimum price
+            <input id="min-price" type="number" min="0" step="1000" placeholder="Any">
+          </label>
+          <label>
+            Maximum price
+            <input id="max-price" type="number" min="0" step="1000" placeholder="Any">
+          </label>
+          <label>
+            Minimum bedrooms
+            <input id="min-beds" type="number" min="0" step="1" placeholder="Any">
+          </label>
+          <label>
+            Minimum bathrooms
+            <input id="min-baths" type="number" min="0" step="0.5" placeholder="Any">
+          </label>
+        </div>
+        <div class="filter-grid">
+          <label>
+            Sale year
+            <select id="sale-year">
+              <option value="">Any year</option>
+            </select>
+          </label>
+        </div>
+        <div class="feature-filters" aria-label="Property features">
+          <label><input id="has-garage" type="checkbox"> Garage</label>
+          <label><input id="has-basement" type="checkbox"> Basement</label>
+          <label><input id="has-cooling" type="checkbox"> Cooling</label>
+          <label><input id="has-heating" type="checkbox"> Heating</label>
+          <label><input id="has-fireplace" type="checkbox"> Fireplace</label>
+        </div>
+        <div class="filter-actions">
+          <button id="clear-filters" type="button">Clear filters</button>
+        </div>
+      </section>
       <div class="explorer">
         <div>
           <div id="town-summary" class="card"></div>
@@ -114,6 +160,19 @@
     const app = document.querySelector("#app");
     const citySelect = document.querySelector("#city-select");
     const searchInput = document.querySelector("#search-input");
+    const saleYear = document.querySelector("#sale-year");
+    const filterInputs = {
+      minPrice: document.querySelector("#min-price"),
+      maxPrice: document.querySelector("#max-price"),
+      minBeds: document.querySelector("#min-beds"),
+      minBaths: document.querySelector("#min-baths"),
+      hasGarage: document.querySelector("#has-garage"),
+      hasBasement: document.querySelector("#has-basement"),
+      hasCooling: document.querySelector("#has-cooling"),
+      hasHeating: document.querySelector("#has-heating"),
+      hasFireplace: document.querySelector("#has-fireplace")
+    };
+    const clearFilters = document.querySelector("#clear-filters");
     const townSummary = document.querySelector("#town-summary");
     const results = document.querySelector("#results");
     const details = document.querySelector("#details");
@@ -189,12 +248,31 @@
     function getFilteredRecords() {
       const city = citySelect.value;
       const query = searchInput.value.trim().toLowerCase();
-      return records.filter((record) => record.city === city && (
-        !query || [
+      const minPrice = Number(filterInputs.minPrice.value);
+      const maxPrice = Number(filterInputs.maxPrice.value);
+      const minBeds = Number(filterInputs.minBeds.value);
+      const minBaths = Number(filterInputs.minBaths.value);
+      const selectedYear = saleYear.value;
+      const featureKeys = Object.entries(filterInputs)
+        .filter(([key, input]) => key.startsWith("has") && input.checked)
+        .map(([key]) => key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`));
+
+      return records.filter((record) => {
+        const price = Number(record.sale_price);
+        const year = record.sale_date.slice(0, 4);
+        const matchesSearch = !query || [
           record.listing_id, record.address_street, record.zipcode,
           record.sale_price, record.sale_date, record.home_type
-        ].some((value) => value.toLowerCase().includes(query))
-      ));
+        ].some((value) => value.toLowerCase().includes(query));
+        return record.city === city
+          && matchesSearch
+          && (!filterInputs.minPrice.value || price >= minPrice)
+          && (!filterInputs.maxPrice.value || price <= maxPrice)
+          && (!filterInputs.minBeds.value || Number(record.beds) >= minBeds)
+          && (!filterInputs.minBaths.value || Number(record.baths) >= minBaths)
+          && (!selectedYear || year === selectedYear)
+          && featureKeys.every((key) => record[key] === "1");
+      });
     }
 
     function renderSummary(cityRecords) {
@@ -301,6 +379,33 @@
       citySelect.innerHTML = cities.map((city) => `<option value="${escapeHtml(city)}">${escapeHtml(city)}</option>`).join("");
       citySelect.addEventListener("change", renderTown);
       searchInput.addEventListener("input", () => {
+        currentPage = 1;
+        renderResults();
+      });
+      const years = [...new Set(records
+        .map((record) => record.sale_date.slice(0, 4))
+        .filter((year) => year !== ""))]
+        .sort((a, b) => b.localeCompare(a));
+      saleYear.insertAdjacentHTML("beforeend", years
+        .map((year) => `<option value="${escapeHtml(year)}">${escapeHtml(year)}</option>`)
+        .join(""));
+      [...Object.values(filterInputs), saleYear].forEach((input) => {
+        input.addEventListener("input", () => {
+          currentPage = 1;
+          renderResults();
+        });
+        input.addEventListener("change", () => {
+          currentPage = 1;
+          renderResults();
+        });
+      });
+      clearFilters.addEventListener("click", () => {
+        searchInput.value = "";
+        saleYear.value = "";
+        Object.values(filterInputs).forEach((input) => {
+          input.checked = false;
+          if (input.type !== "checkbox") input.value = "";
+        });
         currentPage = 1;
         renderResults();
       });
