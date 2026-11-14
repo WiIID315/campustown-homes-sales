@@ -16,3 +16,9 @@ Copy this outline for each entry:
 - **Asked:** "For the website, can you allow the user to select a specific college town and look at individual entries and data?"
 - **Agent produced:** Replaced the city summary table with a town selector, search field, paginated sale list, and full individual-record detail panel in `index.html`.
 - **Checked or changed:** Read the data description before editing, kept `listing_id` as the record key, preserved identifier fields as text, and added HTML escaping for CSV values.
+
+## 2026-11-14: Add sale filters
+
+- **Asked:** "Ok next, let someone be able to filter for certain criteria as well"
+- **Agent produced:** Added price range, minimum bedrooms, minimum bathrooms, sale year, and property-feature filters for garage, basement, cooling, heating, and fireplace.
+- **Checked or changed:** Verified the combined filters in a browser with a 421-result test, checked the page console for errors, and confirmed JavaScript syntax and diff whitespace.
