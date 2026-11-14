@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Median home sale prices by city</title>
+  <title>Explore college-town home sales</title>
   <link rel="icon" href="data:,">
   <style>
     :root {
@@ -13,103 +13,96 @@
       background: #f5f7fa;
     }
 
-    body {
-      margin: 0;
+    body { margin: 0; }
+    main { max-width: 76rem; margin: 0 auto; padding: 3rem 1.25rem; }
+    h1 { margin: 0 0 0.75rem; font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.1; }
+    h2 { margin: 0; font-size: 1.25rem; }
+    .intro { max-width: 52rem; margin: 0 0 2rem; color: #46515c; font-size: 1.1rem; }
+    .rule { margin: 0 0 1.5rem; padding: 0.9rem 1rem; border-left: 4px solid #2364aa; background: #e8f1fb; }
+    .status, .muted { color: #46515c; }
+    .error { color: #a32020; }
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(12rem, 18rem) minmax(14rem, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
     }
-
-    main {
-      max-width: 52rem;
-      margin: 0 auto;
-      padding: 3rem 1.25rem;
+    label { display: grid; gap: 0.4rem; font-weight: 700; }
+    select, input, button {
+      box-sizing: border-box;
+      min-height: 2.75rem;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid #aeb8c2;
+      border-radius: 0.35rem;
+      background: #fff;
+      color: inherit;
+      font: inherit;
     }
-
-    h1 {
-      margin: 0 0 0.75rem;
-      font-size: clamp(2rem, 5vw, 3.25rem);
-      line-height: 1.1;
-    }
-
-    .intro {
-      max-width: 42rem;
-      margin: 0 0 2rem;
-      color: #46515c;
-      font-size: 1.1rem;
-    }
-
-    .rule {
-      margin: 0 0 1.5rem;
-      padding: 0.9rem 1rem;
-      border-left: 4px solid #2364aa;
-      background: #e8f1fb;
-    }
-
-    .status {
-      color: #46515c;
-    }
-
-    .error {
-      color: #a32020;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
+    button { cursor: pointer; text-align: left; }
+    button:hover, button:focus-visible { border-color: #2364aa; background: #eef5fc; }
+    .explorer { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.85fr); gap: 1.5rem; align-items: start; }
+    .card, .table-wrap {
+      overflow: hidden;
       background: #fff;
       border: 1px solid #d5dce3;
       border-radius: 0.5rem;
       box-shadow: 0 0.25rem 1rem rgb(23 32 42 / 8%);
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    caption {
-      padding: 1rem;
-      font-weight: 700;
-      text-align: left;
-    }
-
-    th,
-    td {
-      padding: 0.8rem 1rem;
-      border-top: 1px solid #e4e8ec;
-    }
-
-    th {
-      color: #46515c;
-      font-size: 0.9rem;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-    }
-
-    td:last-child,
-    th:last-child {
-      text-align: right;
-    }
-
-    footer {
-      margin-top: 2rem;
-      color: #65717c;
-      font-size: 0.875rem;
+    .card { padding: 1.25rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    caption { padding: 1rem; font-weight: 700; text-align: left; }
+    th, td { padding: 0.65rem 0.8rem; border-top: 1px solid #e4e8ec; }
+    th { color: #46515c; font-size: 0.85rem; letter-spacing: 0.03em; text-transform: uppercase; }
+    tbody tr.selected { background: #e8f1fb; }
+    .listing-button { display: block; width: 100%; border: 0; border-radius: 0; }
+    .pagination { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 1rem; }
+    .pagination button { min-height: 2.25rem; }
+    .detail-title { margin-bottom: 0.25rem; }
+    .detail-address { margin: 0 0 1rem; color: #46515c; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem 1rem; margin: 0; }
+    .detail-grid div { padding-top: 0.65rem; border-top: 1px solid #e4e8ec; }
+    dt { color: #65717c; font-size: 0.8rem; }
+    dd { margin: 0.15rem 0 0; font-weight: 600; overflow-wrap: anywhere; }
+    footer { margin-top: 2rem; color: #65717c; font-size: 0.875rem; }
+    @media (max-width: 760px) {
+      .controls, .explorer { grid-template-columns: 1fr; }
+      .detail-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
   <main>
-    <h1>Median home sale prices by city</h1>
+    <h1>Explore college-town home sales</h1>
     <p class="intro">
-      Explore completed home sales in the college-town dataset. The figures below are calculated
-      in your browser from the published CSV.
+      Choose a town to browse its completed sales, then select an entry to see the full property
+      record. Every figure is calculated or displayed directly from the published CSV.
     </p>
     <p class="rule">
-      <strong>Price rule:</strong> Sales under $10,000 are left out because the data description
-      identifies them as implausible prices.
+      <strong>Price rule:</strong> The town summary excludes sales under $10,000 because the data
+      description identifies them as implausible prices. Individual records remain available.
     </p>
 
     <p id="status" class="status" role="status">Loading the sales data&hellip;</p>
-    <div id="results"></div>
+    <section id="app" hidden>
+      <div class="controls">
+        <label>
+          College town
+          <select id="city-select"></select>
+        </label>
+        <label>
+          Search this town
+          <input id="search-input" type="search" placeholder="Address, listing ID, ZIP, or price">
+        </label>
+      </div>
+      <div class="explorer">
+        <div>
+          <div id="town-summary" class="card"></div>
+          <div id="results" class="table-wrap"></div>
+        </div>
+        <article id="details" class="card" aria-live="polite"></article>
+      </div>
+    </section>
 
     <footer>
       Data: College-town home sales dataset, version 1.0 (2026). Data collected March 2026.
@@ -118,19 +111,27 @@
 
   <script>
     const status = document.querySelector("#status");
+    const app = document.querySelector("#app");
+    const citySelect = document.querySelector("#city-select");
+    const searchInput = document.querySelector("#search-input");
+    const townSummary = document.querySelector("#town-summary");
     const results = document.querySelector("#results");
+    const details = document.querySelector("#details");
     const minimumSalePrice = 10000;
+    const pageSize = 50;
+    let headers = [];
+    let records = [];
+    let selectedListingId = "";
+    let currentPage = 1;
 
     function parseCsv(text) {
       const rows = [];
       let row = [];
       let field = "";
       let quoted = false;
-
       for (let i = 0; i < text.length; i += 1) {
         const character = text[i];
         const nextCharacter = text[i + 1];
-
         if (character === '"' && quoted && nextCharacter === '"') {
           field += '"';
           i += 1;
@@ -140,26 +141,42 @@
           row.push(field);
           field = "";
         } else if ((character === "\n" || character === "\r") && !quoted) {
-          if (character === "\r" && nextCharacter === "\n") {
-            i += 1;
-          }
+          if (character === "\r" && nextCharacter === "\n") i += 1;
           row.push(field);
-          if (row.some((value) => value !== "")) {
-            rows.push(row);
-          }
+          if (row.some((value) => value !== "")) rows.push(row);
           row = [];
           field = "";
         } else {
           field += character;
         }
       }
-
       if (field !== "" || row.length > 0) {
         row.push(field);
         rows.push(row);
       }
-
       return rows;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[character]));
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency", currency: "USD", maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function formatValue(key, value) {
+      if (value === "") return "Not reported";
+      if (key === "sale_price" || key === "tax_annual_amount" || key === "tax_assessed_value") {
+        return formatCurrency(Number(value));
+      }
+      if (key === "miles_to_campus") return `${value} miles`;
+      if (key.startsWith("has_")) return value === "1" ? "Yes" : "No";
+      return value;
     }
 
     function median(values) {
@@ -169,75 +186,135 @@
         : values[middle];
     }
 
-    function formatCurrency(value) {
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0
-      }).format(value);
+    function getFilteredRecords() {
+      const city = citySelect.value;
+      const query = searchInput.value.trim().toLowerCase();
+      return records.filter((record) => record.city === city && (
+        !query || [
+          record.listing_id, record.address_street, record.zipcode,
+          record.sale_price, record.sale_date, record.home_type
+        ].some((value) => value.toLowerCase().includes(query))
+      ));
     }
 
-    function render(rows) {
-      const headers = rows[0];
-      const cityIndex = headers.indexOf("city");
-      const priceIndex = headers.indexOf("sale_price");
-      const pricesByCity = new Map();
-      let includedSales = 0;
-
-      rows.slice(1).forEach((row) => {
-        const price = Number(row[priceIndex]);
-        if (!Number.isFinite(price) || price < minimumSalePrice) {
-          return;
-        }
-
-        includedSales += 1;
-        if (!pricesByCity.has(row[cityIndex])) {
-          pricesByCity.set(row[cityIndex], []);
-        }
-        pricesByCity.get(row[cityIndex]).push(price);
-      });
-
-      const cityMedians = [...pricesByCity.entries()]
-        .map(([city, prices]) => {
-          prices.sort((a, b) => a - b);
-          return { city, median: median(prices) };
-        })
-        .sort((a, b) => a.city.localeCompare(b.city));
-
-      const table = document.createElement("table");
-      table.innerHTML = `
-        <caption>${cityMedians.length} cities, ${includedSales.toLocaleString("en-US")} included sales</caption>
-        <thead>
-          <tr>
-            <th scope="col">City</th>
-            <th scope="col">Median sale price</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${cityMedians.map(({ city, median: value }) => `
-            <tr>
-              <td>${city}</td>
-              <td>${formatCurrency(value)}</td>
-            </tr>
-          `).join("")}
-        </tbody>
+    function renderSummary(cityRecords) {
+      const validPrices = cityRecords
+        .map((record) => Number(record.sale_price))
+        .filter((price) => Number.isFinite(price) && price >= minimumSalePrice)
+        .sort((a, b) => a - b);
+      const town = cityRecords[0];
+      townSummary.innerHTML = `
+        <h2>${escapeHtml(citySelect.value)}, ${escapeHtml(town.state)}</h2>
+        <p class="muted">${cityRecords.length.toLocaleString("en-US")} recorded sales
+          &middot; ${escapeHtml(town.university)}</p>
+        <strong>Median sale price: ${formatCurrency(median(validPrices))}</strong>
       `;
+    }
 
-      const wrapper = document.createElement("div");
-      wrapper.className = "table-wrap";
-      wrapper.appendChild(table);
-      results.replaceChildren(wrapper);
-      status.textContent = "Calculated from data/college_town_home_sales.csv.";
+    function renderDetails(record) {
+      if (!record) {
+        details.innerHTML = "<h2>Select a sale</h2><p class=\"muted\">Choose an entry to inspect its complete record.</p>";
+        return;
+      }
+      const detailKeys = [
+        "listing_id", "sale_price", "sale_date", "list_date", "contract_date",
+        "beds", "baths", "living_area_sqft", "lot_size_sqft", "year_built",
+        "stories", "home_type", "has_basement", "has_garage", "garage_spaces",
+        "has_cooling", "has_heating", "has_fireplace", "architectural_style",
+        "roof_type", "tax_annual_amount", "tax_assessed_value", "school_district",
+        "zipcode", "county", "county_fips", "parcel_number", "university",
+        "miles_to_campus"
+      ];
+      details.innerHTML = `
+        <h2 class="detail-title">${escapeHtml(record.address_street)}</h2>
+        <p class="detail-address">${escapeHtml(record.city)}, ${escapeHtml(record.state)}</p>
+        <dl class="detail-grid">
+          ${detailKeys.map((key) => `
+            <div><dt>${escapeHtml(key.replaceAll("_", " "))}</dt>
+            <dd>${escapeHtml(formatValue(key, record[key]))}</dd></div>
+          `).join("")}
+        </dl>
+      `;
+    }
+
+    function renderResults() {
+      const filtered = getFilteredRecords();
+      const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+      currentPage = Math.min(currentPage, totalPages);
+      const start = (currentPage - 1) * pageSize;
+      const pageRecords = filtered.slice(start, start + pageSize);
+      if (!pageRecords.some((record) => record.listing_id === selectedListingId)) {
+        selectedListingId = pageRecords[0]?.listing_id || "";
+      }
+      results.innerHTML = `
+        <table>
+          <caption>${filtered.length.toLocaleString("en-US")} matching sales</caption>
+          <thead><tr><th scope="col">Address</th><th scope="col">Sale date</th><th scope="col">Sale price</th></tr></thead>
+          <tbody>
+            ${pageRecords.map((record) => `
+              <tr class="${record.listing_id === selectedListingId ? "selected" : ""}">
+                <td><button class="listing-button" data-listing-id="${escapeHtml(record.listing_id)}">
+                  ${escapeHtml(record.address_street)}<br><span class="muted">${escapeHtml(record.listing_id)}</span>
+                </button></td>
+                <td>${escapeHtml(record.sale_date || "Not reported")}</td>
+                <td>${escapeHtml(formatCurrency(Number(record.sale_price)))}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <div class="pagination">
+          <button id="previous-page" type="button" ${currentPage === 1 ? "disabled" : ""}>Previous</button>
+          <span class="muted">Page ${currentPage} of ${totalPages}</span>
+          <button id="next-page" type="button" ${currentPage === totalPages ? "disabled" : ""}>Next</button>
+        </div>
+      `;
+      results.querySelectorAll("[data-listing-id]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedListingId = button.dataset.listingId;
+          renderResults();
+          renderDetails(records.find((record) => record.listing_id === selectedListingId));
+        });
+      });
+      results.querySelector("#previous-page").addEventListener("click", () => {
+        currentPage -= 1;
+        renderResults();
+      });
+      results.querySelector("#next-page").addEventListener("click", () => {
+        currentPage += 1;
+        renderResults();
+      });
+      renderDetails(records.find((record) => record.listing_id === selectedListingId));
+    }
+
+    function renderTown() {
+      const cityRecords = records.filter((record) => record.city === citySelect.value);
+      currentPage = 1;
+      selectedListingId = "";
+      renderSummary(cityRecords);
+      renderResults();
+    }
+
+    function initialize(rows) {
+      headers = rows[0];
+      records = rows.slice(1).map((row) => Object.fromEntries(headers.map((header, index) => [header, row[index] || ""])));
+      const cities = [...new Set(records.map((record) => record.city))].sort((a, b) => a.localeCompare(b));
+      citySelect.innerHTML = cities.map((city) => `<option value="${escapeHtml(city)}">${escapeHtml(city)}</option>`).join("");
+      citySelect.addEventListener("change", renderTown);
+      searchInput.addEventListener("input", () => {
+        currentPage = 1;
+        renderResults();
+      });
+      app.hidden = false;
+      renderTown();
+      status.textContent = `Loaded ${records.length.toLocaleString("en-US")} sales from data/college_town_home_sales.csv.`;
     }
 
     fetch("data/college_town_home_sales.csv")
       .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Could not load the sales data (${response.status}).`);
-        }
+        if (!response.ok) throw new Error(`Could not load the sales data (${response.status}).`);
         return response.text();
       })
-      .then((text) => render(parseCsv(text)))
+      .then((text) => initialize(parseCsv(text)))
       .catch((error) => {
         status.className = "status error";
         status.textContent = error.message;
